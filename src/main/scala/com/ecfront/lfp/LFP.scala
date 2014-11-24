@@ -4,21 +4,19 @@ import java.io.File
 import java.util.concurrent.CountDownLatch
 
 import akka.actor.{ActorSystem, Props}
-import akka.routing.RoundRobinRouter
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 /**
  * 程序入口类
  * @param path 文件路径
  * @param processFun 自定义的处理函数，输入为行列表
- * @param threadNumber 工作线程数
  * @param chunkSize 每次抓取文件大小（bytes）
  */
-class LFP(path: String, processFun: (Array[String] => Unit), threadNumber: Int = Runtime.getRuntime.availableProcessors() * 2, chunkSize: Int = 300000) extends LazyLogging {
+class LFP(path: String, processFun: (Array[String] => Unit), chunkSize: Int = 300000) extends LazyLogging {
 
   private val startTime = System.currentTimeMillis()
 
-  logger.debug("Started LFP,path: " + path+",threadNumber:"+threadNumber+",chunkSize:"+chunkSize+",time:"+startTime)
+  logger.debug("Started LFP,path: " + path + ",chunkSize:" + chunkSize + ",time:" + startTime)
 
   private val file = new File(path)
   private val count = (file.length() + chunkSize - 1) / chunkSize - 1
@@ -26,7 +24,7 @@ class LFP(path: String, processFun: (Array[String] => Unit), threadNumber: Int =
   private val counter = new CountDownLatch(count.intValue() + 1)
   logger.debug("Counter total :" + counter.getCount)
 
-  private val router = LFP.system.actorOf(Props(new LineCollector(LFP.system.actorOf(Props(new LineProcessor(processFun, counter))))).withRouter(RoundRobinRouter(nrOfInstances = 8)))
+  private val router = LFP.system.actorOf(Props(new LineCollector(LFP.system.actorOf(Props(new LineProcessor(processFun, counter))))))
 
   for (i <- 0 until count.toInt) {
     val start = i * chunkSize
@@ -52,16 +50,17 @@ object LFP extends LazyLogging {
 
   val system = ActorSystem("lfp_system")
 
+  //threadNumber 工作线程数
+  def setThread(threadNumber: Int): Unit = {
+    LineProcessor.init(threadNumber)
+  }
+
   def apply(path: String, processFun: (Array[String] => Unit)) = {
     new LFP(path, processFun)
   }
 
-  def apply(path: String, processFun: (Array[String] => Unit), threadNumber: Int) = {
-    new LFP(path, processFun, threadNumber)
-  }
-
-  def apply(path: String, processFun: (Array[String] => Unit), threadNumber: Int, chunkSize: Int) = {
-    new LFP(path, processFun, threadNumber, chunkSize)
+  def apply(path: String, processFun: (Array[String] => Unit), chunkSize: Int) = {
+    new LFP(path, processFun, chunkSize)
   }
 
 }
