@@ -55,6 +55,10 @@ object LFP extends LazyLogging {
     LineProcessor.init(threadNumber)
   }
 
+  def setAsync={
+    LineProcessor.async=true
+  }
+
   def apply(path: String, processFun: (Array[String] => Unit)) = {
     new LFP(path, processFun)
   }
