@@ -19,7 +19,7 @@ LFP("文件路径","自定义处理函数",<处理线程数，可选，默认为
 
 
 ### Check out sources
-`git clone https://github.com/gudaoxuri/LEGO.git`
+`git clone https://github.com/gudaoxuri/large-file-processor.git`
 
 ### License
 
