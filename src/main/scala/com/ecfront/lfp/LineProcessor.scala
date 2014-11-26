@@ -2,29 +2,29 @@ package com.zjhcsoft.lfp
 
 import java.util.concurrent.{ExecutorService, Executors, CountDownLatch}
 
-import akka.actor.Actor
+import akka.actor.{ActorLogging, Actor}
 import akka.event.Logging
 
 
-class LineProcessor(processFun: (Array[String] => Unit),counter:CountDownLatch) extends Actor {
-
-  private val logger = Logging(context.system, this)
+class LineProcessor(processFun: (Array[String] => Unit),counter:CountDownLatch) extends Actor with ActorLogging{
 
   def receive = {
     case lines: Array[String] =>
       if(LineProcessor.async){
         LineProcessor.executor.execute(new Runnable {
           override def run(): Unit = {
-            processFun(lines)
-            counter.countDown()
-            logger.debug("Counter remainder :" + counter.getCount)
+            execute(lines)
           }
         })
       }else{
-        processFun(lines)
-        counter.countDown()
-        logger.debug("Counter remainder :" + counter.getCount)
+        execute(lines)
       }
+  }
+
+  def execute(lines: Array[String]) {
+    processFun(lines)
+    counter.countDown()
+    log.debug("Counter remainder :" + counter.getCount)
   }
 
 }

@@ -3,16 +3,14 @@ package com.zjhcsoft.lfp
 import java.io.{File, RandomAccessFile}
 import java.nio.channels.FileChannel
 
-import akka.actor.{Actor, ActorRef}
+import akka.actor.{ActorLogging, Actor, ActorRef}
 import akka.event.Logging
 
 /**
  * 行集合收集类
  * @param lineProcess 行数据处理
  */
-class LineCollector(lineProcess: ActorRef) extends Actor {
-
-  private val logger = Logging(context.system, this)
+class LineCollector(lineProcess: ActorRef) extends Actor with ActorLogging{
 
   def receive = {
     case (fileName: String, chunkStart: Int, chunkSize: Int) =>
