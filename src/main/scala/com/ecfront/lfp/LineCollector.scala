@@ -1,21 +1,20 @@
-package com.zjhcsoft.lfp
+package com.ecfront.lfp
 
 import java.io.{File, RandomAccessFile}
 import java.nio.channels.FileChannel
 
-import akka.actor.{ActorLogging, Actor, ActorRef}
-import akka.event.Logging
+import akka.actor.{Actor, ActorLogging, ActorRef}
 
 /**
  * 行集合收集类
  * @param lineProcess 行数据处理
  */
-class LineCollector(lineProcess: ActorRef) extends Actor with ActorLogging{
+class LineCollector(lineProcess: ActorRef) extends Actor with ActorLogging {
 
   def receive = {
     case (fileName: String, chunkStart: Int, chunkSize: Int) =>
       val file = new File(fileName)
-      val channel = new RandomAccessFile(file, "r").getChannel()
+      val channel = new RandomAccessFile(file, "r").getChannel
       val mappedBuff = channel.map(FileChannel.MapMode.READ_ONLY, 0, file.length())
 
       //确定end position
@@ -27,12 +26,12 @@ class LineCollector(lineProcess: ActorRef) extends Actor with ActorLogging{
       val start = mappedBuff.get(chunkStart)
       val startPosition = rowOffsetProcess(chunkStart, mappedBuff, start, endP)
       val end = mappedBuff.get(endP)
-      val endPosition = if ((endP != file.length() - 1)) rowOffsetProcess(endP, mappedBuff, end, endP) else endP
+      val endPosition = if (endP != file.length() - 1) rowOffsetProcess(endP, mappedBuff, end, endP) else endP
       val stringBuilder = new StringBuilder()
       for (i <- startPosition to endPosition) {
         stringBuilder.append(mappedBuff.get(i).asInstanceOf[Char])
       }
-      lineProcess ! stringBuilder.toString.split('\n').filter(_.trim != "")
+      lineProcess ! stringBuilder.toString().split('\n').filter(_.trim != "")
   }
 
   /**

@@ -1,4 +1,4 @@
-package com.zjhcsoft.lfp
+package com.ecfront.lfp
 
 import java.io.File
 import java.util.concurrent.CountDownLatch
@@ -55,8 +55,8 @@ object LFP extends LazyLogging {
     LineProcessor.init(threadNumber)
   }
 
-  def setAsync={
-    LineProcessor.async=true
+  def setAsync() = {
+    LineProcessor.async = true
   }
 
   def apply(path: String, processFun: (Array[String] => Unit)) = {

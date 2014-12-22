@@ -1,4 +1,4 @@
-import com.zjhcsoft.lfp.LFP
+import com.ecfront.lfp.LFP
 
 object Test extends App {
 
