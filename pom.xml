@@ -10,7 +10,7 @@
     <description>多线程分段处理大文件</description>
     <url>https://github.com/gudaoxuri/large-file-processor</url>
     <packaging>jar</packaging>
-    <version>1.0</version>
+    <version>1.1</version>
 
     <licenses>
         <license>
