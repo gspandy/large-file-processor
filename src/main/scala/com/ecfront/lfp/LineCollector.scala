@@ -4,6 +4,7 @@ import java.io.{File, RandomAccessFile}
 import java.nio.channels.FileChannel
 
 import akka.actor.{Actor, ActorLogging, ActorRef}
+import sun.nio.ch.DirectBuffer
 
 /**
  * 行集合收集类
@@ -16,7 +17,6 @@ class LineCollector(lineProcess: ActorRef) extends Actor with ActorLogging {
       val file = new File(fileName)
       val channel = new RandomAccessFile(file, "r").getChannel
       val mappedBuff = channel.map(FileChannel.MapMode.READ_ONLY, 0, file.length())
-
       //确定end position
       var endP = chunkSize
       if (endP >= file.length()) {
@@ -31,6 +31,9 @@ class LineCollector(lineProcess: ActorRef) extends Actor with ActorLogging {
       for (i <- startPosition to endPosition) {
         stringBuilder.append(mappedBuff.get(i).asInstanceOf[Char])
       }
+      channel.close()
+      //需要手工关闭，否则文件还会被占用
+      mappedBuff.asInstanceOf[DirectBuffer].cleaner().clean()
       lineProcess ! stringBuilder.toString().split('\n').filter(_.trim != "")
   }
 
